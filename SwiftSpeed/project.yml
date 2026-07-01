@@ -1,0 +1,36 @@
+name: SwiftSpeed
+options:
+  bundleIdPrefix: com.chahine
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    ENABLE_HARDENED_RUNTIME: YES
+    CODE_SIGN_STYLE: Automatic
+    SWIFT_STRICT_CONCURRENCY: complete
+targets:
+  SwiftSpeed:
+    type: application
+    platform: macOS
+    deploymentTarget: "26.0"
+    sources:
+      - path: Sources/SwiftSpeed
+        excludes:
+          - "Info.plist"
+          - "SwiftSpeed.entitlements"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.chahine.SwiftSpeed
+        PRODUCT_NAME: SwiftSpeed
+        INFOPLIST_FILE: Sources/SwiftSpeed/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: Sources/SwiftSpeed/SwiftSpeed.entitlements
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: "1"
+schemes:
+  SwiftSpeed:
+    build:
+      targets:
+        SwiftSpeed: all
+    run:
+      config: Debug

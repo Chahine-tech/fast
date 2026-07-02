@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		05F234D76F61423D456C067D /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F895ADA75550CC3AC95D0F3 /* NetworkMonitor.swift */; };
 		0D103EA8CA28615BEEB9143E /* SwiftSpeedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A69AEEB21DE58C0FA8CC088B /* SwiftSpeedApp.swift */; };
+		31B0A68D65E36DC82E47070F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B114EB7725D49C2FDF9A6EE5 /* Assets.xcassets */; };
 		5A81FD41427052035CE14557 /* PopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40BA7CDF8C1B2179DAC17ECA /* PopoverView.swift */; };
 		643A801C95B800E695BC2A17 /* TransferMeter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC8CA0FCB69D3A4E1803E082 /* TransferMeter.swift */; };
 		716B09C289054C654010F1FE /* SpeedSparklineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C2920FE0E4B9A6028AC83A6 /* SpeedSparklineView.swift */; };
@@ -25,6 +26,7 @@
 		62BB624DB59BEF0284715E95 /* SpeedTester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeedTester.swift; sourceTree = "<group>"; };
 		7536DB93CD4AE378333A6CE2 /* TestResultView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestResultView.swift; sourceTree = "<group>"; };
 		A69AEEB21DE58C0FA8CC088B /* SwiftSpeedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftSpeedApp.swift; sourceTree = "<group>"; };
+		B114EB7725D49C2FDF9A6EE5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DC8CA0FCB69D3A4E1803E082 /* TransferMeter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransferMeter.swift; sourceTree = "<group>"; };
 		E1916755F951354993A9688E /* Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatting.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -40,6 +42,14 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		56AABCF7EB09862D11C63C95 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B114EB7725D49C2FDF9A6EE5 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		7668318D065DF0157DAB008E /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -53,6 +63,7 @@
 			children = (
 				A69AEEB21DE58C0FA8CC088B /* SwiftSpeedApp.swift */,
 				FBD5B57AA4E542FF8A120E44 /* Models */,
+				56AABCF7EB09862D11C63C95 /* Resources */,
 				1DDA875FA559D609FB424E32 /* Views */,
 			);
 			name = SwiftSpeed;
@@ -86,6 +97,7 @@
 			buildConfigurationList = B71A50287AE139350856E13D /* Build configuration list for PBXNativeTarget "SwiftSpeed" */;
 			buildPhases = (
 				95A963C1C995C13B3D98E245 /* Sources */,
+				61908B44AC9C39A44C855B29 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -130,6 +142,17 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		61908B44AC9C39A44C855B29 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				31B0A68D65E36DC82E47070F /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		95A963C1C995C13B3D98E245 /* Sources */ = {

@@ -11,6 +11,9 @@ struct PopoverView: View {
                 history: speedTester.downloadHistory,
                 peak: speedTester.peakSpeed
             )
+            .contentShape(Rectangle())
+            .onTapGesture { startTest() }
+            .help("Click to run a new test")
 
             TestSummaryView(state: speedTester.state)
                 .font(.system(.caption, design: .monospaced))
@@ -41,9 +44,16 @@ struct PopoverView: View {
         .onAppear {
             networkMonitor.start()
             if case .idle = speedTester.state {
-                Task { await speedTester.runTest() }
+                startTest()
             }
         }
+    }
+
+    /// Starts a fresh test — from a tap on the result area, or automatically
+    /// when the popover first opens. No-op while a test is already running.
+    private func startTest() {
+        guard !speedTester.isRunning else { return }
+        Task { await speedTester.runTest(isConnected: networkMonitor.isConnected) }
     }
 }
 

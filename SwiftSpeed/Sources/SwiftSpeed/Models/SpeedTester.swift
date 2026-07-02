@@ -48,8 +48,12 @@ final class SpeedTester: ObservableObject {
     private let downloadByteCount = 80_000_000  // 80 MB total, 20 MB/stream
     private let uploadByteCount = 40_000_000    // 40 MB total, 10 MB/stream
 
-    func runTest() async {
+    func runTest(isConnected: Bool) async {
         guard !isTestActive else { return }
+        guard isConnected else {
+            state = .failed("No internet connection")
+            return
+        }
         isTestActive = true
         defer { isTestActive = false }
 

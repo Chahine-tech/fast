@@ -10,16 +10,38 @@ struct TestResultView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(primarySpeed.formattedSpeed)
+            Text(primaryText)
                 .font(.system(.title, design: .monospaced, weight: .bold))
-                .foregroundStyle(.primary)
+                .foregroundStyle(isFailed ? .secondary : .primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
 
-            if !history.isEmpty {
+            if isFailed {
+                // "Flatline" instead of the real sparkline — same shape and
+                // rhythm, dimmed and static, reads as "no signal" without
+                // needing a new icon or element.
+                SpeedSparklineView(
+                    history: Array(repeating: 0, count: 16),
+                    peak: 0,
+                    tint: Color(nsColor: .tertiaryLabelColor),
+                    showPeakLabel: false
+                )
+            } else if !history.isEmpty {
                 SpeedSparklineView(history: history, peak: peak)
             }
         }
+    }
+
+    // "0 bps" would read as a real (failed) measurement rather than "no
+    // data" — a plain dash makes the failure state visually unambiguous.
+    private var primaryText: String {
+        if case .failed = state { return "—" }
+        return primarySpeed.formattedSpeed
+    }
+
+    private var isFailed: Bool {
+        if case .failed = state { return true }
+        return false
     }
 
     private var primarySpeed: Double {
@@ -58,9 +80,15 @@ struct TestSummaryView: View {
             + Text(locationSuffix(result))
                 .foregroundStyle(.tertiary)
 
+        case .failed(let message) where message == SpeedTester.offlineMessage:
+            // Already shown by the network status dot in the footer — no
+            // need to repeat "Offline" a second time here.
+            EmptyView()
+
         case .failed(let message):
             Text(message)
                 .foregroundStyle(.red)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 

@@ -19,6 +19,11 @@ final class SpeedTester: ObservableObject {
         case failed(String)
     }
 
+    /// Shared with the views so they can tell "you're offline" apart from a
+    /// genuine test failure (rate limit, server error) without string-sniffing
+    /// some arbitrary system error text.
+    static let offlineMessage = "Offline"
+
     @Published private(set) var state: TestState = .idle
 
     // Live samples of the current/last download test, driving the sparkline —
@@ -51,7 +56,7 @@ final class SpeedTester: ObservableObject {
     func runTest(isConnected: Bool) async {
         guard !isTestActive else { return }
         guard isConnected else {
-            state = .failed("No internet connection")
+            state = .failed(Self.offlineMessage)
             return
         }
         isTestActive = true
@@ -96,6 +101,28 @@ final class SpeedTester: ObservableObject {
     private var isFailed: Bool {
         if case .failed = state { return true }
         return false
+    }
+
+    /// Collapses the various "you're not actually online" system errors into
+    /// the same short message the pre-flight check uses, instead of showing
+    /// raw (and often long/truncated) system text like "The Internet
+    /// connection appears to be offline."
+    private static func friendlyMessage(for error: Error) -> String {
+        let nsError = error as NSError
+        if nsError.domain == NSURLErrorDomain {
+            switch nsError.code {
+            case NSURLErrorNotConnectedToInternet,
+                 NSURLErrorNetworkConnectionLost,
+                 NSURLErrorCannotConnectToHost,
+                 NSURLErrorCannotFindHost,
+                 NSURLErrorDNSLookupFailed,
+                 NSURLErrorTimedOut:
+                return offlineMessage
+            default:
+                break
+            }
+        }
+        return error.localizedDescription
     }
 
     /// One round-trip to Cloudflare's trace endpoint, reused both as a ping
@@ -156,7 +183,7 @@ final class SpeedTester: ObservableObject {
             let elapsed = max(Date().timeIntervalSince(overallStart), 0.001)
             return Double(streamTotals.reduce(0, +)) / elapsed
         } catch {
-            state = .failed(error.localizedDescription)
+            state = .failed(Self.friendlyMessage(for: error))
             return 0
         }
     }
@@ -191,7 +218,7 @@ final class SpeedTester: ObservableObject {
             let elapsed = max(Date().timeIntervalSince(overallStart), 0.001)
             return Double(streamTotals.reduce(0, +)) / elapsed
         } catch {
-            state = .failed(error.localizedDescription)
+            state = .failed(Self.friendlyMessage(for: error))
             return 0
         }
     }

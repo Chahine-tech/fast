@@ -6,6 +6,8 @@ import SwiftUI
 struct SpeedSparklineView: View {
     let history: [Double]
     let peak: Double
+    var tint: Color = .mint
+    var showPeakLabel: Bool = true
 
     private let maxColumns = 16
     private let maxRows = 4
@@ -38,7 +40,7 @@ struct SpeedSparklineView: View {
                         for col in 0..<2 {
                             let x = columnX + CGFloat(col) * (dotWidth + 1)
                             let rect = CGRect(x: x, y: y, width: dotWidth, height: dotWidth)
-                            context.fill(Path(ellipseIn: rect), with: .color(.mint.opacity(0.5 + 0.5 * normalized)))
+                            context.fill(Path(ellipseIn: rect), with: .color(tint.opacity(0.5 + 0.5 * normalized)))
                         }
                     }
                 }
@@ -47,10 +49,12 @@ struct SpeedSparklineView: View {
             .frame(height: 22)
             .animation(.smooth(duration: 0.25), value: history)
 
-            Text("peak \(peak.formattedSpeed)")
-                .font(.system(.caption2, design: .monospaced))
-                .foregroundStyle(.tertiary)
-                .fixedSize()
+            if showPeakLabel {
+                Text("peak \(peak.formattedSpeed)")
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(.tertiary)
+                    .fixedSize()
+            }
         }
     }
 }

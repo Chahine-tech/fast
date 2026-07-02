@@ -45,11 +45,11 @@ struct TestSummaryView: View {
                 .foregroundStyle(.tertiary)
 
         case .testingDownload:
-            Text("Testing download…")
+            PulsingText("Testing download…")
                 .foregroundStyle(.secondary)
 
         case .testingUpload(_, let speed):
-            Text("↑ \(speed.formattedSpeed)  ·  testing upload…")
+            PulsingText("↑ \(speed.formattedSpeed)  ·  testing upload…")
                 .foregroundStyle(.secondary)
 
         case .completed(let result):
@@ -67,5 +67,23 @@ struct TestSummaryView: View {
     private func locationSuffix(_ result: SpeedTester.CompletedResult) -> String {
         let parts = [result.serverColo, result.clientLocation].filter { !$0.isEmpty }
         return parts.isEmpty ? "" : "  ·  " + parts.joined(separator: " · ")
+    }
+}
+
+/// A gentle breathing-opacity "in progress" indicator — kept as plain text
+/// rather than a spinner/icon, so it doesn't clash with the flat, minimal style.
+private struct PulsingText: View {
+    let text: String
+    @State private var isPulsing = false
+
+    init(_ text: String) {
+        self.text = text
+    }
+
+    var body: some View {
+        Text(text)
+            .opacity(isPulsing ? 0.35 : 1.0)
+            .animation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true), value: isPulsing)
+            .onAppear { isPulsing = true }
     }
 }

@@ -27,13 +27,14 @@ struct TestResultView: View {
         case .idle: return 0
         case .testingDownload(_, let speed): return speed
         case .testingUpload: return peak
-        case .completed(let download, _, _): return download
+        case .completed(let result): return result.download
         case .failed: return 0
         }
     }
 }
 
-/// Upload/ping + status line, shown once a full test has completed.
+/// Upload/ping + status line, shown once a full test has completed. A second,
+/// more muted line adds server/client info when a completed test has it.
 struct TestSummaryView: View {
     let state: SpeedTester.TestState
 
@@ -51,13 +52,20 @@ struct TestSummaryView: View {
             Text("↑ \(speed.formattedSpeed)  ·  testing upload…")
                 .foregroundStyle(.secondary)
 
-        case .completed(_, let upload, let ping):
-            Text("↑ \(upload.formattedSpeed)  ·  ↕ \(Int(ping)) ms")
+        case .completed(let result):
+            Text("↑ \(result.upload.formattedSpeed)  ·  ↕ \(Int(result.unloadedPing))→\(Int(result.loadedPing)) ms")
                 .foregroundStyle(.secondary)
+            + Text(locationSuffix(result))
+                .foregroundStyle(.tertiary)
 
         case .failed(let message):
             Text(message)
                 .foregroundStyle(.red)
         }
+    }
+
+    private func locationSuffix(_ result: SpeedTester.CompletedResult) -> String {
+        let parts = [result.serverColo, result.clientLocation].filter { !$0.isEmpty }
+        return parts.isEmpty ? "" : "  ·  " + parts.joined(separator: " · ")
     }
 }

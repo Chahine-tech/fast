@@ -2,11 +2,20 @@ import Foundation
 
 @MainActor
 final class SpeedTester: ObservableObject {
+    struct CompletedResult: Equatable {
+        let download: Double
+        let upload: Double
+        let unloadedPing: Double   // idle round-trip, measured before any transfer starts
+        let loadedPing: Double     // round-trip measured while the download is saturating the link
+        let serverColo: String     // Cloudflare datacenter that served the test, e.g. "CDG"
+        let clientLocation: String // client's country code, e.g. "FR"
+    }
+
     enum TestState: Equatable {
         case idle
         case testingDownload(progress: Double, currentSpeed: Double)
         case testingUpload(progress: Double, currentSpeed: Double)
-        case completed(download: Double, upload: Double, ping: Double)
+        case completed(CompletedResult)
         case failed(String)
     }
 
@@ -48,7 +57,18 @@ final class SpeedTester: ObservableObject {
         peakSpeed = 0
         state = .testingDownload(progress: 0, currentSpeed: 0)
 
-        async let pingResult = measurePing()
+        // Warm up the connection (DNS/TCP/TLS) first and discard it — otherwise
+        // the "unloaded" baseline pays one-time cold-start costs that the
+        // "loaded" sample (reusing the now-warm connection) doesn't, making
+        // the two numbers incomparable regardless of actual network load.
+        _ = await fetchTrace()
+
+        // Baseline ping measured before any transfer starts (idle/"unloaded").
+        let unloadedTrace = await fetchTrace()
+
+        // A second ping measured *while* the download is saturating the link
+        // ("loaded") — the gap between the two is a rough bufferbloat signal.
+        async let loadedTraceResult = fetchTrace()
         let downloadSpeed = await measureDownload()
 
         guard !isFailed else { return }
@@ -58,8 +78,15 @@ final class SpeedTester: ObservableObject {
 
         guard !isFailed else { return }
 
-        let ping = await pingResult
-        state = .completed(download: downloadSpeed, upload: uploadSpeed, ping: ping)
+        let loadedTrace = await loadedTraceResult
+        state = .completed(CompletedResult(
+            download: downloadSpeed,
+            upload: uploadSpeed,
+            unloadedPing: unloadedTrace.ping,
+            loadedPing: loadedTrace.ping,
+            serverColo: loadedTrace.colo.isEmpty ? unloadedTrace.colo : loadedTrace.colo,
+            clientLocation: unloadedTrace.loc.isEmpty ? loadedTrace.loc : unloadedTrace.loc
+        ))
     }
 
     private var isFailed: Bool {
@@ -67,11 +94,24 @@ final class SpeedTester: ObservableObject {
         return false
     }
 
-    private func measurePing() async -> Double {
+    /// One round-trip to Cloudflare's trace endpoint, reused both as a ping
+    /// sample and as a source for server/client info — it's the same request
+    /// either way, no reason to fetch it twice for two different purposes.
+    private func fetchTrace() async -> (ping: Double, colo: String, loc: String) {
         let url = URL(string: "https://speed.cloudflare.com/cdn-cgi/trace")!
         let start = Date()
-        _ = try? await URLSession.shared.data(from: url)
-        return Date().timeIntervalSince(start) * 1000
+        guard let (data, _) = try? await URLSession.shared.data(from: url) else {
+            return (Date().timeIntervalSince(start) * 1000, "", "")
+        }
+        let elapsed = Date().timeIntervalSince(start) * 1000
+        let text = String(data: data, encoding: .utf8) ?? ""
+
+        var fields: [String: String] = [:]
+        for line in text.split(separator: "\n") {
+            let parts = line.split(separator: "=", maxSplits: 1)
+            if parts.count == 2 { fields[String(parts[0])] = String(parts[1]) }
+        }
+        return (elapsed, fields["colo"] ?? "", fields["loc"] ?? "")
     }
 
     private func measureDownload() async -> Double {

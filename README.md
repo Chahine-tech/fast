@@ -2,6 +2,10 @@
 
 A tiny, native macOS menu bar app to test your internet speed. Click the icon, get download/upload/ping — no browser tab, no ads.
 
+<p align="center">
+  <img src="docs/demo.jpg" width="420" alt="SwiftSpeed menu bar popover showing a completed speed test, with the menu bar visible">
+</p>
+
 ## Features
 
 - One-click speed test: download, upload, ping (idle vs. under load)

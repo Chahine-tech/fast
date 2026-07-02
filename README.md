@@ -47,4 +47,4 @@ All testing traffic goes to Cloudflare's public speed-test infrastructure (`spee
 
 ## License
 
-MIT
+[MIT](LICENSE)
